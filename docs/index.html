@@ -29,7 +29,7 @@
         //   console.log(convertedImage);
         document.body.innerHTML += `<p>convert time = ${new Date().getTime() - startTime}</p>`
           let imageBlob = new Blob([convertedImage.buffer], {
-            type: "image/jpeg",
+            type: "image/png",
           });
           let imageUrl = URL.createObjectURL(imageBlob);
         //   console.log(imageUrl);
