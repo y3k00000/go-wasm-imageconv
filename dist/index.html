@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image convert with Golang+WASM Demo</title>
+    <script src="wasm_exec.js"></script>
+  </head>
+  <body>
+    <h1>Generating PNG's from JPEG file...</h1><br>
+    <script>
+      (async () => {
+          let startTime = new Date().getTime();
+        let go = new Go();
+        let result = await WebAssembly.instantiateStreaming(
+          fetch("index.wasm"),
+          go.importObject
+        );
+        go.run(result.instance);
+        document.body.innerHTML += `<p>init time = ${new Date().getTime() - startTime}</p>`
+        console.log(add(1, 2));
+        for (;;) {
+          let imageResponse = await fetch("urk.jpg");
+          let imageBuffer = await imageResponse.arrayBuffer();
+          let imageData = new Uint8Array(imageBuffer);
+          let startTime = new Date().getTime();
+          let convertedImage = toPng(imageData);
+        //   console.log(convertedImage);
+        document.body.innerHTML += `<p>convertTime = ${new Date().getTime() - startTime}</p>`
+          let imageBlob = new Blob([convertedImage.buffer], {
+            type: "image/jpeg",
+          });
+          let imageUrl = URL.createObjectURL(imageBlob);
+        //   console.log(imageUrl);
+          let imageElement = document.createElement("img");
+          imageElement.src = imageUrl;
+          document.body.appendChild(imageElement);
+        }
+      })();
+    </script>
+  </body>
+</html>
