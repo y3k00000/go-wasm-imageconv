@@ -1,1 +1,1 @@
-GOOS=js GOARCH=wasm go build -o dist/index.wasm
+GOOS=js GOARCH=wasm go build -o docs/index.wasm
