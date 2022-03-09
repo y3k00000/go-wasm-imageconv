@@ -25,7 +25,6 @@ func toPng(imageBytes []byte) ([]byte, error) {
 	contentType := http.DetectContentType(imageBytes)
 
 	switch contentType {
-	case "image/png":
 	case "image/jpeg":
 		img, err := jpeg.Decode(bytes.NewReader(imageBytes))
 		if err != nil {

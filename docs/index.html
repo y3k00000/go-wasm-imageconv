@@ -18,7 +18,7 @@
           go.importObject
         );
         go.run(result.instance);
-        document.body.innerHTML += `<p>init time = ${new Date().getTime() - startTime}</p>`
+        document.body.innerHTML += `<p>module init time = ${new Date().getTime() - startTime}</p>`
         console.log(add(1, 2));
         for (;;) {
           let imageResponse = await fetch("urk.jpg");
@@ -27,7 +27,7 @@
           let startTime = new Date().getTime();
           let convertedImage = toPng(imageData);
         //   console.log(convertedImage);
-        document.body.innerHTML += `<p>convertTime = ${new Date().getTime() - startTime}</p>`
+        document.body.innerHTML += `<p>convert time = ${new Date().getTime() - startTime}</p>`
           let imageBlob = new Blob([convertedImage.buffer], {
             type: "image/jpeg",
           });
