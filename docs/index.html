@@ -6,41 +6,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Image convert with Golang+WASM Demo</title>
     <script src="wasm_exec.js"></script>
+    <style>
+      table {
+        border-collapse: collapse;
+        border-spacing: 0;
+      }
+      th,
+      td {
+        padding: 10px 20px;
+        border: 1px solid #000;
+      }
+    </style>
   </head>
   <body>
-    <h1>Generating PNG's from JPEG file...</h1><br>
+    <h1>Generating PNG's from JPEG file...</h1>
+    <br />
+    <table>
+      <th>Memory Stats</th>
+      <tbody id="memstat"></tbody>
+    </table>
     <script>
       (async () => {
-          let startTime = new Date().getTime();
+        let startTime = new Date().getTime();
         let go = new Go();
         let result = await WebAssembly.instantiateStreaming(
           fetch("index.wasm"),
           go.importObject
         );
         go.run(result.instance);
-        document.body.innerHTML += `<p>module init time = ${new Date().getTime() - startTime}</p>`
-        console.log(add(1, 2));
+        let goInstance = linkGo({});
+        // console.log(goInstance);
+        document.body.innerHTML += `<p>module init time = ${
+          new Date().getTime() - startTime
+        }</p>`;
+        // console.log(goInstance.add(1, 2));
         for (;;) {
           let imageResponse = await fetch("urk.jpg");
           let imageBuffer = await imageResponse.arrayBuffer();
           let imageData = new Uint8Array(imageBuffer);
           let startTime = new Date().getTime();
-          let convertedImage = toPng(imageData);
-        //   console.log(convertedImage);
-        document.body.innerHTML += `<p>convert time = ${new Date().getTime() - startTime}</p>`
+          let convertedImage = goInstance.toPng(imageData);
+          //   console.log(convertedImage);
+          document.body.innerHTML += `<p>convert time = ${
+            new Date().getTime() - startTime
+          }</p>`;
           let imageBlob = new Blob([convertedImage.buffer], {
             type: "image/png",
           });
           let imageUrl = URL.createObjectURL(imageBlob);
-        //   console.log(imageUrl);
+          //   console.log(imageUrl);
           let imageElement = document.createElement("img");
           imageElement.src = imageUrl;
           document.body.appendChild(imageElement);
-          let memoryStat = JSON.parse(statMemory());
-          for(key in memoryStat){
-            memoryStat[key] = `${Math.round(memoryStat[key]/1000)} KBytes`
+          let memoryStat = JSON.parse(goInstance.statMemory());
+          let statTable = document.querySelector("#memstat");
+          statTable.innerHTML = "";
+          for (stat in memoryStat) {
+            statTable.innerHTML += `<tr><td>${stat}</td><td>${memoryStat[stat]}</td></tr>`;
           }
-          document.body.innerHTML += `<p>memory stat = ${JSON.stringify(memoryStat)}</>`
         }
       })();
     </script>

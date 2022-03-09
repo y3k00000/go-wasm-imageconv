@@ -62,10 +62,12 @@ func statMemory() string { // https://golangcode.com/print-the-current-memory-us
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	stat := make(map[string]interface{})
-	stat["m.Alloc"] = m.Alloc
-	stat["m.TotalAlloc"] = m.TotalAlloc
-	stat["m.Sys"] = m.Sys
-	stat["m.NumGC"] = m.NumGC
+	stat["memoryAllocatedKilo"] = m.Alloc / 1024
+	stat["totalMemoryAllocatedKilo"] = m.TotalAlloc / 1024
+	stat["systemMemoryKilo"] = m.Sys / 1024
+	stat["countOfGC"] = m.NumGC
+	stat["heapAllocatedKilo"] = m.HeapAlloc / 1024
+	stat["memoryFrees"] = m.Frees
 	statBytes, err := json.Marshal(stat)
 	if err != nil {
 		panic(err)
@@ -77,16 +79,23 @@ func statMemoryJS(this js.Value, args []js.Value) interface{} {
 	return statMemory()
 }
 
+func linkGo(this js.Value, args []js.Value) interface{} {
+	args[0].Set("add", js.FuncOf(addJS))
+	args[0].Set("toPng", js.FuncOf(toPngJS))
+	args[0].Set("statMemory", js.FuncOf(statMemoryJS))
+	js.Global().Delete("linkGo")
+	return args[0]
+}
+
 func main() {
 	fmt.Println("it works!")
-	js.Global().Set("add", js.FuncOf(addJS))
-	js.Global().Set("toPng", js.FuncOf(toPngJS))
-	js.Global().Set("statMemory", js.FuncOf(statMemoryJS))
+	js.Global().Set("linkGo", js.FuncOf(linkGo))
 	go func() { // goroutine works inside wasm too
-		for {
+		for i := 0; i < 20; i++ {
 			fmt.Println("From goroutine!!")
 			time.Sleep(5 * time.Second)
 		}
+		fmt.Println("goroutine bye!!")
 	}()
 	waitC := make(chan (int), 1)
 	<-waitC
