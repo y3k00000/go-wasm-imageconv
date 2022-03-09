@@ -36,6 +36,11 @@
           let imageElement = document.createElement("img");
           imageElement.src = imageUrl;
           document.body.appendChild(imageElement);
+          let memoryStat = JSON.parse(statMemory());
+          for(key in memoryStat){
+            memoryStat[key] = `${Math.round(memoryStat[key]/1000)} KBytes`
+          }
+          document.body.innerHTML += `<p>memory stat = ${JSON.stringify(memoryStat)}</>`
         }
       })();
     </script>
